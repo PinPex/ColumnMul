@@ -19,76 +19,99 @@ public:
         bigNum.push_back(0);
     }
 
-    void operator=(bigNumber bignum) {
-        bigNum = bignum.bigNum;
+    bigNumber operator=(bigNumber bignum) {
+        return bignum;
     }
 
-    void operator+(bigNumber bignum) {
-        if (bignum.bigNum.size() > bigNum.size()) {
-            for (int i = 0; i < bignum.bigNum.size() - bigNum.size(); ++i) {
-                bigNum.insert(bigNum.begin(), 0);
+    int countOper = 0;
+
+    int plus(bigNumber &big1, bigNumber& big2) {
+        bigNumber big;
+        if (big2.bigNum.size() > big1.bigNum.size()) {
+            for (int i = 0; i < big2.bigNum.size() - big1.bigNum.size(); ++i) {
+                big1.bigNum.insert(big1.bigNum.begin(), 0);
             }
         }
         else
-            if (bignum.bigNum.size() < bigNum.size()) {
-                for (int i = 0; i < bigNum.size() - bignum.bigNum.size(); ++i) {
-                    bignum.bigNum.insert(bignum.bigNum.begin(), 0);
+            if (big2.bigNum.size() < big1.bigNum.size()) {
+                for (int i = 0; i < big1.bigNum.size() - big2.bigNum.size(); ++i) {
+                    big2.bigNum.insert(big2.bigNum.begin(), 0);
                 }
             }
-        for (int i = 0; i < bigNum.size(); ++i) {
-            bigNum[i] += bignum.bigNum[i];
+        for (int i = 0; i < big1.bigNum.size(); ++i) {
+            big1.bigNum[i] += big2.bigNum[i];
+            this->countOper++;
         }
-        for (int i = bigNum.size() - 1; i >= 0; --i) {
-            if (bigNum[i] > 9) {
-                bigNum[i] = bigNum[i] % 10;
+        for (int i = big1.bigNum.size() - 1; i >= 0; --i) {
+            if (big1.bigNum[i] > 9) {
+                big1.bigNum[i] = big1.bigNum[i] % 10;
                 if (i == 0) {
-                    bigNum.insert(bigNum.begin(), 1);
+                    big1.bigNum.insert(bigNum.begin(), 1);
                 }
                 else {
-                    bigNum[i - 1]++;
-                }             
+                    big1.bigNum[i - 1]++;
+                }
+                this->countOper++;
             }
         }
+        return this->countOper;
     }
 
-    void operator*(int num) {
-        for (int i = 0; i < bigNum.size(); ++i) {
-            bigNum[i] *= num;
+    int Mul(bigNumber& big, int num) {
+        for (int i = 0; i < big.bigNum.size(); ++i) {
+            big.bigNum[i] *= num;
+            this->countOper++;
             //cout << bigNum[i] << " ";
         }
         cout << endl;
-        for (int i = bigNum.size() - 1; i >= 0; --i) {
-            if (bigNum[i] > 9) {
-                int current = bigNum[i] % 10;
-                int next = bigNum[i] / 10;
-                bigNum[i] = current;
+        for (int i = big.bigNum.size() - 1; i >= 0; --i) {
+            if (big.bigNum[i] > 9) {
+                int current = big.bigNum[i] % 10;
+                int next = big.bigNum[i] / 10;
+                big.bigNum[i] = current;
                 if (i != 0) {
-                    bigNum[i - 1] += next;
+                    big.bigNum[i - 1] += next;
                 }
                 else {
-                    bigNum.insert(bigNum.begin(), next);
+                    big.bigNum.insert(big.bigNum.begin(), next);
                 }
+                this->countOper++;
             }
         }
-
+        return this->countOper;
     }
 
-    void operator*(bigNumber bignum) {
-        bigNumber* big = new bigNumber[bignum.bigNum.size()];
-        for (int i = 0; i < bignum.bigNum.size(); ++i) {
-            big[i].bigNum = bigNum;
+    vector<int> addNulls(vector<int> &bigNum, int countZeros) {
+        for (int i = 0; i < countZeros; ++i) {
+            bigNum.push_back(0);
         }
-        for (int i = bignum.bigNum.size() - 1; i >= 0; --i) {
-            int temp = bignum.bigNum[i];
-            big[i] * temp;
-            for (int j =  0; j < i; ++j) {
-                big[i].bigNum.push_back(0);
-            }
+        return bigNum;
+    }
+
+
+    int Mul(bigNumber &big1, bigNumber& big2) {
+        
+        bigNumber* big = new bigNumber[big2.bigNum.size()];
+        for (int i = 0; i < big2.bigNum.size(); ++i) {
+            big[i].bigNum = big1.bigNum;
         }
-        for (int i = 1; i < bignum.bigNum.size(); ++i) {
-            big[0] + big[i];
+        int j = 0;
+        for (int i = big2.bigNum.size() - 1; i >= 0; --i) {
+            int temp = big2.bigNum[i];
+            this->countOper += Mul(big[j], temp);
+            j++;
+            //big[i] * temp;
         }
-        bigNum = big[0].bigNum;
+        for (int i = 0; i < big2.bigNum.size(); ++i) {
+            big[i].bigNum = addNulls(big[i].bigNum, i);
+            //big[i].printNumber();
+        }
+        for (int i = 1; i < big2.bigNum.size(); ++i) {
+            this->countOper += plus(big[0], big[i]);
+        }
+        cout << endl;
+        big1.bigNum = big[0].bigNum;
+        return this->countOper;
     }
 
     void printNumber() {
@@ -96,6 +119,13 @@ public:
             cout << bigNum[i];
         }
         cout << endl;
+    }
+
+    void printCountOper() {
+        cout << countOper << endl;
+    }
+    void CountOperNull() {
+        countOper = 0;
     }
 };
 
@@ -111,14 +141,21 @@ int main()
     cout << "Input second number: ";
     cin >> secondNum;
     bigNumber firstBnum(firstNum);
-    firstBnum.printNumber();
+    //firstBnum.printNumber();
     bigNumber secondBnum(secondNum);
-    secondBnum.printNumber();
-    firstBnum * secondBnum;
+    //secondBnum.printNumber();
+    cout << "Result: ";
+    firstBnum.printNumber();
+    cout << "Count operations: ";
+    int count = firstBnum.Mul(firstBnum, secondBnum);
+    cout << count << endl;
+    
+    //firstBnum.printNumber();
+    //firstBnum.printCountOper();
     //secondBnum + secondBnum;
     //firstBnum + secondBnum;
     
-    firstBnum.printNumber();
+    //firstBnum.printNumber();
     //secondBnum.printNumber();
 }
 
